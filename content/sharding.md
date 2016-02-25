@@ -58,7 +58,20 @@ mongos将客户端程序的读写路由到特定的shard上，这些程序不直
 
 ![mongos](https://docs.mongodb.org/manual/_images/sharded-cluster.png)
 
+## 生产环境集群架构
 
+在生产环境下部署分片集群，必须要确保数据的冗余和系统的高可用。一个生产集群必须具有如下组成
+
+* **配置服务器Config Server**
+  一般配置服务器也按照复制集来部署，他必须运行WiredTiger存储引擎。配置服务器不可以在多个分片集群之间共享，每个翻盘集群需要独占式地使用配置服务器。
+
+* **2个以上复制集Shard**
+  至少2个以上的shard才可以形成分片集群，每个shard都是一个复制集。
+
+* **1个以上mongos**
+  mongos是集群的路由，支持部署情况下，每个应用服务器都可以使用一个mongos的实例。由于每个mongos内部的游标和资源都是独立的，所以每个客户端只能与一个特定的mongos实例交互。
+ 
+![prdshard](https://docs.mongodb.org/manual/_images/sharded-cluster-production-architecture.png)
 
 
 
