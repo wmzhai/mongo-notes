@@ -22,7 +22,7 @@ mongodb各个节点常见的搭配方式为：一主一从、一主多从。
 
 MongoDB复制结构图如下所示，客户端从主节点读取数据，在客户端写入数据到主节点时，主节点与从节点进行数据交互保障数据的一致性。
 
-![](https://raw.githubusercontent.com/wmzhai/mongo-notes/master/content/img/replication.png)
+![replication](https://raw.githubusercontent.com/wmzhai/mongo-notes/master/content/img/replication.png)
 
 **副本集特征**
 * N个节点的集群
