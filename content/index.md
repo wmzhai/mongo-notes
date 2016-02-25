@@ -3,6 +3,6 @@ MongoDB Notes
 
 **Introduction**
 
-# [Replication](replication.md)
+# [复制集](replication.md)
 
-# [Sharding](sharding.md)
+# [分片](sharding.md)
