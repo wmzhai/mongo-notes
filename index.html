@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><!-- Built with spec-md --><head><meta charset="utf-8"><title>MongoDB Notes</title><link href="spec.css" rel="stylesheet"><link href="highlight.css" rel="stylesheet"></head><body><header><h1>MongoDB Notes</h1><div class="spec-toc"><div class="title">Contents</div><ol><li><a href="#sec-undefined.-"><span class="spec-secid">1</span>安装</a><input hidden class="toggle" type="checkbox" checked id="_toggle_1" /><label for="_toggle_1"></label><ol><li><a href="#sec-undefined.-.-"><span class="spec-secid">1.1</span>安装</a></li><li><a href="#sec-undefined.-.-"><span class="spec-secid">1.2</span>服务运行</a></li></ol></li><li><a href="#sec-undefined.-"><span class="spec-secid">2</span>复制集</a><input hidden class="toggle" type="checkbox" checked id="_toggle_2" /><label for="_toggle_2"></label><ol><li><a href="#sec-undefined.-.-"><span class="spec-secid">2.1</span>什么是复制集</a></li><li><a href="#sec-undefined.-.-"><span class="spec-secid">2.2</span>复制集原理</a></li></ol></li><li><a href="#sec-undefined.-"><span class="spec-secid">3</span>分片</a><input hidden class="toggle" type="checkbox" checked id="_toggle_3" /><label for="_toggle_3"></label><ol><li><a href="#sec-undefined.-.-"><span class="spec-secid">3.1</span>简介</a><input hidden class="toggle" type="checkbox" checked id="_toggle_3.1" /><label for="_toggle_3.1"></label><ol><li><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.1</span>什么是分片</a></li><li><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.2</span>分片目的</a></li><li><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.3</span>分片结构</a></li></ol></li><li><a href="#sec-undefined.-.-"><span class="spec-secid">3.2</span>分片集群组成</a><input hidden class="toggle" type="checkbox" checked id="_toggle_3.2" /><label for="_toggle_3.2"></label><ol><li><a href="#sec-Shards"><span class="spec-secid">3.2.1</span>Shards</a></li><li><a href="#sec-Config-Server"><span class="spec-secid">3.2.2</span>Config Server</a></li><li><a href="#sec-mongos"><span class="spec-secid">3.2.3</span>mongos</a></li></ol></li><li><a href="#sec-undefined.-.-"><span class="spec-secid">3.3</span>生产环境集群架构</a></li></ol></li></ol></div></header><section id="sec-undefined.-" secid="1"><h2><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-">1</a></span>安装</h2><section id="sec-undefined.-.-" secid="1.1"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">1.1</a></span>安装</h3><p>首先</p><pre><code>$ sudo brew install mongo
+$ sudo mkdir -p /data/db
+$ sudo chown -Rv &lt;username&gt; /data/db
+</code></pre><p>然后可以通过命令行启动mongo</p><pre><code>$ mongod
+</code></pre></section><section id="sec-undefined.-.-" secid="1.2"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">1.2</a></span>服务运行</h3><pre><code>$ brew services start mongo
+</code></pre></section></section><section id="sec-undefined.-" secid="2"><h2><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-">2</a></span>复制集</h2><section id="sec-undefined.-.-" secid="2.1"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">2.1</a></span>什么是复制集</h3><p>MongoDB复制集是将数据同步在多个服务器的过程。 复制提供了数据的冗余备份，并在多个服务器上存储数据副本，提高了数据的可用性，并可以保证数据的安全性。复制还允许您从硬件故障和服务中断中恢复数据。</p><ul><li>保障数据的安全性</li><li>数据高可用性</li><li>灾难恢复</li><li>无需停机维护（如备份，重建索引，压缩）</li><li>分布式读取数据</li></ul></section><section id="sec-undefined.-.-" secid="2.2"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">2.2</a></span>复制集原理</h3><p>mongodb的复制至少需要两个节点。其中一个是主节点，负责处理客户端请求，其余的都是从节点，负责复制主节点上的数据。</p><p>mongodb各个节点常见的搭配方式为：一主一从、一主多从。</p><p>主节点记录在其上的所有操作oplog，从节点定期轮询主节点获取这些操作，然后对自己的数据副本执行这些操作，从而保证从节点的数据与主节点一致。</p><p>MongoDB复制结构图如下所示，客户端从主节点读取数据，在客户端写入数据到主节点时，主节点与从节点进行数据交互保障数据的一致性。</p><p><img src="https://docs.mongodb.org/manual/_images/replica-set-read-write-operations-primary.png" alt="replication"/></p><p><strong>副本集特征</strong></p><ul><li>N个节点的集群</li><li>任何节点可作为主节点</li><li>所有写入操作都在主节点上</li><li>自动故障转移</li><li>自动恢复 </li></ul></section></section><section id="sec-undefined.-" secid="3"><h2><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-">3</a></span>分片</h2><section id="sec-undefined.-.-" secid="3.1"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">3.1</a></span>简介</h3><section id="sec-undefined.-.-.-" secid="3.1.1"><h4><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-.-">3.1.1</a></span>什么是分片</h4><p>分片(Sharding)是一种MongodB的集群技术，用以支持特别大的数据及以及非常高的吞吐操作。可以满足MongoDB数据量大量增长的需求。</p><p>当MongoDB存储海量的数据时，一台机器可能不足以存储数据也足以提供可接受的读写吞吐量。这时，我们就可以通过在多台机器上分割数据，使得数据库系统能存储和处理更多的数据。</p></section><section id="sec-undefined.-.-.-" secid="3.1.2"><h4><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-.-">3.1.2</a></span>分片目的</h4><p>单台服务器能够支持的数据量和吞吐量都是有限的，过高频度的查询会耗尽服务器的CPU资源，而过大数据的存储量会好景服务器的存储资源。</p><p>为了达到scaling的目的，数据系统有两种技术：<strong>vertical scaling</strong>和<strong>分片(sharding)</strong></p><p><strong>vertical scaling</strong> 为服务器添加更多的CPU和存储以增加服务器的能力。但是这种方法是有限度的，而且成本和性能并不能成正比。 所以，vertical scaling是有一个最大限度的。</p><p><strong>分片sharing</strong> 分片技术分解数据集并将数据分别放在多个服务器(shards)上，每个shard是一个独立的数据库，而总体又可以组成一个逻辑上数据库。</p><p><img src="https://docs.mongodb.org/manual/_images/sharded-collection.png" alt="shard"/></p><p>通过分片技术可以解决高吞吐量和大数据集的问题</p><ul><li>分片减少了单个shard上的操作数量。当集群变大时，每个shard需要操作的数量是减少的。相应地，集群可以达到水平扩张的目的。</li><li>分片减少了单个服务器上的存储量。如上图所示，原来1T的数据，分成4个shards以后，每个片只需要保存256G即可。</li></ul></section><section id="sec-undefined.-.-.-" secid="3.1.3"><h4><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-.-">3.1.3</a></span>分片结构</h4><p>下图展示了在MongoDB中使用分片集群结构分布：</p><p><img src="https://docs.mongodb.org/manual/_images/sharded-cluster-production-architecture.png" alt="sharding"/></p><p>上图中主要有如下所述三个主要组件：</p><ul><li><strong>Shard</strong> 用于存储实际的数据块。 在实际生产环境中，每个shard都应该是一个复制集。</li><li><strong>Router</strong> mongos实例，接受客户端的请求并将操作路由到特定的shard上，最终将shard返回的结果返回给客户端。 一个集群可以有多个mongos以分解请求的负载。</li><li><strong>Config Server</strong> 保存集群的元数据(metadata)，保存了从数据集到shard的映射关系。查询路由mongos利用这些元数据来决定具体的shard。</li></ul></section></section><section id="sec-undefined.-.-" secid="3.2"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">3.2</a></span>分片集群组成</h3><p>分片集群由Shards，mongos和Config Server组成。</p><section id="sec-Shards" secid="3.2.1"><h4><span class="spec-secid" title="link to this section"><a href="#sec-Shards">3.2.1</a></span>Shards</h4><p>Shard是保存整个分片集群子数据集的mongod实例或复制集。所有shard的数据在一起组成了集群所有的数据。</p><p>在生产环境下，每个shard都应该是一个复制集，通过复制集保证每个shard的高可用和冗余。</p></section><section id="sec-Config-Server" secid="3.2.2"><h4><span class="spec-secid" title="link to this section"><a href="#sec-Config-Server">3.2.2</a></span>Config Server</h4><p>配置服务器保存分片集群的元数据，将chunks映射到shards上。 配置服务器自身也应该配置成复制集。</p></section><section id="sec-mongos" secid="3.2.3"><h4><span class="spec-secid" title="link to this section"><a href="#sec-mongos">3.2.3</a></span>mongos</h4><p>mongos将客户端程序的读写路由到特定的shard上，这些程序不直接读写shard。</p><p><img src="https://docs.mongodb.org/manual/_images/sharded-cluster.png" alt="mongos"/></p></section></section><section id="sec-undefined.-.-" secid="3.3"><h3><span class="spec-secid" title="link to this section"><a href="#sec-undefined.-.-">3.3</a></span>生产环境集群架构</h3><p>在生产环境下部署分片集群，必须要确保数据的冗余和系统的高可用。一个生产集群必须具有如下组成</p><ul><li><strong>配置服务器Config Server</strong> 一般配置服务器也按照复制集来部署，他必须运行WiredTiger存储引擎。配置服务器不可以在多个分片集群之间共享，每个翻盘集群需要独占式地使用配置服务器。</li><li><strong>2个以上复制集Shard</strong> 至少2个以上的shard才可以形成分片集群，每个shard都是一个复制集。</li><li><strong>1个以上mongos</strong> mongos是集群的路由，支持部署情况下，每个应用服务器都可以使用一个mongos的实例。由于每个mongos内部的游标和资源都是独立的，所以每个客户端只能与一个特定的mongos实例交互。 <img src="https://docs.mongodb.org/manual/_images/sharded-cluster-production-architecture.png" alt="prdshard"/></li></ul><p>- </p></section></section><footer>Written in <a href="http://leebyron.com/spec-md/" target="_blank">Spec Markdown</a>.</footer><input hidden class="spec-sidebar-toggle" type="checkbox" id="spec-sidebar-toggle" aria-hidden /><label for="spec-sidebar-toggle" aria-hidden>&#x2630;</label><div class="spec-sidebar" aria-hidden><div class="spec-toc"><div class="title"><a href="#">MongoDB Notes</a></div><ol><li id="_sidebar_1"><a href="#sec-undefined.-"><span class="spec-secid">1</span>安装</a><input hidden class="toggle" type="checkbox" id="_sidebar_toggle_1" /><label for="_sidebar_toggle_1"></label><ol><li id="_sidebar_1.1"><a href="#sec-undefined.-.-"><span class="spec-secid">1.1</span>安装</a></li><li id="_sidebar_1.2"><a href="#sec-undefined.-.-"><span class="spec-secid">1.2</span>服务运行</a></li></ol></li><li id="_sidebar_2"><a href="#sec-undefined.-"><span class="spec-secid">2</span>复制集</a><input hidden class="toggle" type="checkbox" id="_sidebar_toggle_2" /><label for="_sidebar_toggle_2"></label><ol><li id="_sidebar_2.1"><a href="#sec-undefined.-.-"><span class="spec-secid">2.1</span>什么是复制集</a></li><li id="_sidebar_2.2"><a href="#sec-undefined.-.-"><span class="spec-secid">2.2</span>复制集原理</a></li></ol></li><li id="_sidebar_3"><a href="#sec-undefined.-"><span class="spec-secid">3</span>分片</a><input hidden class="toggle" type="checkbox" id="_sidebar_toggle_3" /><label for="_sidebar_toggle_3"></label><ol><li id="_sidebar_3.1"><a href="#sec-undefined.-.-"><span class="spec-secid">3.1</span>简介</a><input hidden class="toggle" type="checkbox" id="_sidebar_toggle_3.1" /><label for="_sidebar_toggle_3.1"></label><ol><li id="_sidebar_3.1.1"><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.1</span>什么是分片</a></li><li id="_sidebar_3.1.2"><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.2</span>分片目的</a></li><li id="_sidebar_3.1.3"><a href="#sec-undefined.-.-.-"><span class="spec-secid">3.1.3</span>分片结构</a></li></ol></li><li id="_sidebar_3.2"><a href="#sec-undefined.-.-"><span class="spec-secid">3.2</span>分片集群组成</a><input hidden class="toggle" type="checkbox" id="_sidebar_toggle_3.2" /><label for="_sidebar_toggle_3.2"></label><ol><li id="_sidebar_3.2.1"><a href="#sec-Shards"><span class="spec-secid">3.2.1</span>Shards</a></li><li id="_sidebar_3.2.2"><a href="#sec-Config-Server"><span class="spec-secid">3.2.2</span>Config Server</a></li><li id="_sidebar_3.2.3"><a href="#sec-mongos"><span class="spec-secid">3.2.3</span>mongos</a></li></ol></li><li id="_sidebar_3.3"><a href="#sec-undefined.-.-"><span class="spec-secid">3.3</span>生产环境集群架构</a></li></ol></li></ol></div><script>
+(function () {
+var currentSection;
+var numberedSections = [];
+
+var sections = document.getElementsByTagName('section');
+for (var i = 0; i < sections.length; i++) {
+  if (sections[i].getAttribute('secid')) {
+    numberedSections.push(sections[i]);
+  }
+}
+
+var scrollPos = window.scrollY;
+var pending = false;
+window.addEventListener('scroll', function (e) {
+  scrollPos = window.scrollY;
+  if (!pending) {
+    pending = true;
+    window.requestAnimationFrame(function () {
+      updateSectionFocus(scrollPos);
+      pending = false;
+    });
+  }
+});
+
+function updateSectionFocus(pos) {
+  var readLine = pos + document.documentElement.clientHeight / 4;
+
+  var focusedSection;
+  for (var n = numberedSections.length - 1; n >= 0; n--) {
+    if (numberedSections[n].offsetTop < readLine) {
+      focusedSection = numberedSections[n];
+      break;
+    }
+  }
+
+  var secid = focusedSection && focusedSection.getAttribute('secid');
+  if (secid !== currentSection) {
+    currentSection && fold(currentSection, false);
+    secid && fold(secid, true);
+    currentSection = secid;
+  }
+}
+
+function fold(secid, check) {
+  document.getElementById('_sidebar_' + secid).className = check ? 'viewing' : '';
+  var sections = secid.split('.');
+  while (sections.length) {
+    var toggle = document.getElementById('_sidebar_toggle_' + sections.join('.'));
+    if (toggle) {
+      toggle.checked = check;
+    }
+    sections.pop();
+  }
+}
+
+updateSectionFocus(window.scrollY);
+})();</script></div></body></html>
