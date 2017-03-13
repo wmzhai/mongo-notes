@@ -1,7 +1,7 @@
 MongoDB Notes
 -------
 
-**Introduction**
+# [安装](install.md)
 
 # [复制集](replication.md)
 

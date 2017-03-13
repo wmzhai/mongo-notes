@@ -14,5 +14,8 @@
     "watch": "onchange './content/*.md' -- npm run build",
     "deploy": "sh ./resources/deploy.sh",
     "clean": "rm -rf out"
+  },
+  "devDependencies": {
+    "spec-md": "^0.4.8"
   }
 }
