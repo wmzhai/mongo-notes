@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "nodemon --exec 'mocha -R min' "
+    "watch": "nodemon --exec 'mocha -R min' ",
+    "test": "mocha"
   },
   "author": "Weiming Zhai <wmzhai@gmail.com>",
   "license": "MIT",
