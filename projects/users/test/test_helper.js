@@ -14,8 +14,13 @@ before((done) => {
 });
 
 beforeEach((done)=>{
-  mongoose.connection.collections.users.drop(()=>{
-    // Ready to run the next test!
-    done();
+  const { users, comments, blogposts } = mongoose.connection.collections; //所有名都会小写化
+  users.drop(()=>{
+    comments.drop(() => {
+      blogposts.drop(() =>{
+        // Ready to run the next test!
+        done();
+      });
+    });
   });
 });
