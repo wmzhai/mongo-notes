@@ -11,8 +11,14 @@ const UserSchema = new Schema({
     },
     required: [true, 'Name is required.']
   },
-  postCount: Number,
   posts: [PostSchema]
+});
+
+// 这里不能用箭头函数
+// 箭头函数体内的this对象，就是定义时所在的对象，而不是使用时所在的对象，这里this是整个文件的上下文
+// 而function定义的这个的this
+UserSchema.virtual('postCount').get(function(){
+  return this.posts.length;
 });
 
 const User = mongoose.model('user', UserSchema);
