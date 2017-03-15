@@ -11,7 +11,8 @@ const UserSchema = new Schema({
     },
     required: [true, 'Name is required.']
   },
-  posts: [PostSchema]
+  posts: [PostSchema],
+  likes: Number
 });
 
 // 这里不能用箭头函数
